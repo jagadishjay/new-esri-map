@@ -29,7 +29,7 @@ export class MapComponent implements OnInit {
           "esri/widgets/BasemapGallery"
 
       ]);
-      const apiKey = "AAPKbbbbe4d9675f40cead3f30cf916a1067sDFTApekQDbMPJdmX1FycG0mHsTqi7zbOrSXTQWDEAlCDkxbeA4h6RbrPxYyOm09";
+      const apiKey = "";
 
 
       // Create layer showing sample census data of the United States.
