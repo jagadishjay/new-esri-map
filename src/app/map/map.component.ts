@@ -1,18 +1,24 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit } from '@angular/core';
 import { loadModules } from 'esri-loader';
 import esri = __esri;
 import { HttpClient } from "@angular/common/http";
+
+declare var $: any;
+declare var jQuery: any;
 @Component({
   selector: 'app-map',
   templateUrl: './map.component.html',
   styleUrls: ['./map.component.css']
 })
+
 export class MapComponent implements OnInit {
 
-  constructor(private httpClient: HttpClient) { }
+  constructor(private httpClient: HttpClient,private elRef: ElementRef) { }
   layersData: Array<Object> = [];
   layersData1: Array<Object> = [];
+  layerDataList: any = [];
   errorMessage: any;
+  
   async initializeMap() {
     try {
 
@@ -77,7 +83,12 @@ export class MapComponent implements OnInit {
             url: item.MapUrl,
             outFields: ["*"],
           });
+         let layerInfo = {
+            layer: layer,
+            layerName: item.LayerName
+          }
           this.layersData1.push(layer);
+          this.layerDataList.push(layerInfo);
           //demographicGroupLayer.add(layer);
         }
 
@@ -86,8 +97,10 @@ export class MapComponent implements OnInit {
         title: "Layers List",
         visible: true,
         visibilityMode: "exclusive",
-        layers: this.layersData1,
-        opacity: 0.75
+       layers: this.layersData1,
+        //layers: [USALayer],
+        opacity: 0.75,
+        
       });
 
       // Create a map and add the group layer to it
@@ -99,7 +112,8 @@ export class MapComponent implements OnInit {
         ground: "world-elevation",
         portalItem: {
           // autocasts as new PortalItem()
-          id: "10f5128431d44f9180d9936834100ac5"
+        //  id: "10f5128431d44f9180d9936834100ac5"
+        
         }
       });
 
@@ -202,6 +216,7 @@ export class MapComponent implements OnInit {
 
         const layerList = new LayerList({
           view: view,
+          
           // executes for each ListItem in the LayerList
           listItemCreatedFunction: defineActions
         });
@@ -209,13 +224,30 @@ export class MapComponent implements OnInit {
         // Event listener that fires each time an action is triggered
 
         layerList.on("trigger-action", (event: any) => {
+          layerList.selectionEnabled = true;
+layerList.multipleSelectionEnabled = true;
           // The layer visible in the view at the time of the trigger.
-         // const visibleLayer = USALayer.visible ? USALayer : censusLayer;
-          const visibleLayer = demographicGroupLayer['uid']
+         //const visibleLayer = USALayer.visible ? USALayer : censusLayer;
+         console.log(this.layerDataList, event);
+         //$('body').find(event.action.className).parent().find('span.esri-layer-list__item-title');
+         let layerName: any = document?.querySelector(`.esri-layer-list__item-toggle .esri-icon-radio-checked`)?.parentNode?.parentNode;
+         //const layerName= $('body').find(event.action.className).parent().find('span.esri-layer-list__item-title');
+        console.log(layerName?.innerText);
+        let layerExtent;
+        this.layerDataList.forEach((item:any)=>{
+          if(item.layerName == layerName?.innerText){
+            layerExtent = item.layer
+          }
+        })
+         const visibleLayer = layerList.visible ? layerExtent : this.errorMessage;
+         //demographicGroupLayer
           // Capture the action id.
           const id = event.action.id;
 
           if (id === "full-extent") {
+            // if the full-extent action is triggered then navigate
+            // to the full extent of the visible layer
+            view.goTo(visibleLayer.fullExtent);
             // if the full-extent action is triggered then navigate
             // to the full extent of the visible layer
             view.goTo(visibleLayer.fullExtent).catch((error: { name: string; }) => {

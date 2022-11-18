@@ -4,6 +4,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { MapComponent } from './map/map.component';
 import { NgModule } from '@angular/core';
 import { HttpClientModule } from '@angular/common/http';
+import * as $ from "jquery";
 @NgModule({
   declarations: [
     AppComponent,
